@@ -1,9 +1,9 @@
 <?php
 
-namespace Bolt\Extension\YourName\ExtensionName\Tests;
+namespace Bolt\Extension\Gigabit\OpeningHours\Tests;
 
+use Bolt\Extension\Gigabit\OpeningHours\OpeningHoursExtension;
 use Bolt\Tests\BoltUnitTest;
-use Bolt\Extension\YourName\ExtensionName\ExtensionNameExtension;
 
 /**
  * ExtensionName testing class.
@@ -18,7 +18,7 @@ class ExtensionTest extends BoltUnitTest
     public function testExtensionBasics()
     {
         $app = $this->getApp(false);
-        $extension = new ExtensionNameExtension($app);
+        $extension = new OpeningHoursExtension($app);
 
         $name = $extension->getName();
         $this->assertSame($name, 'ExtensionName');

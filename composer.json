@@ -1,8 +1,13 @@
 {
-    "name": "bolt/bolt-extension-starter",
-    "description": "",
+    "name": "gigabit/opening-hours",
+    "description": "A plugin to manage opening hours of a e.g. store",
     "type": "bolt-extension",
     "keywords": [
+        "opening times",
+        "hours",
+        "opening",
+        "times",
+        "opening hours"
     ],
     "require": {
         "bolt/bolt": "^3.0"
@@ -13,25 +18,25 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "",
-            "email": "you@example.com"
+            "name": "Thomas Helmrich",
+            "email": "thomas@gigabit.de"
         }
     ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "Bolt\\Extension\\YourName\\ExtensionName\\": "src"
+            "Bolt\\Extension\\Gigabit\\OpeningHours\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Bolt\\Extension\\YourName\\ExtensionName\\Tests\\": "tests",
+            "Bolt\\Extension\\Gigabit\\OpeningHours\\Tests\\": "tests",
             "Bolt\\Tests\\": "vendor/bolt/bolt/tests/phpunit/unit/"
         }
     },
     "extra": {
         "bolt-assets": "web",
-        "bolt-class": "Bolt\\Extension\\YourName\\ExtensionName\\ExtensionNameExtension"
+        "bolt-class": "Bolt\\Extension\\Gigabit\\OpeningHours\\OpeningHoursExtension"
     }
 }
