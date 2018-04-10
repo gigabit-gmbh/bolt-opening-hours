@@ -18,8 +18,8 @@ class OpeningHoursExtension extends SimpleExtension
     protected function registerTwigFunctions()
     {
         return [
-            'openingTimes' => ['showOpeningTimes', ['is_safe' => ['html']]],
-            'openingTimesOverview' => ['showOpeningTimesOverview', ['is_safe' => ['html']]],
+            'openingHours' => ['showOpeningHours', ['is_safe' => ['html']]],
+            'openingHoursOverview' => ['showOpeningHoursOverview', ['is_safe' => ['html']]],
         ];
     }
 
@@ -46,7 +46,7 @@ class OpeningHoursExtension extends SimpleExtension
     /**
      * @return string
      */
-    public function showOpeningTimes()
+    public function showOpeningHours()
     {
         $todayDateTime = new \DateTime();
         $todayDate = new \DateTime("today midnight");
@@ -95,7 +95,7 @@ class OpeningHoursExtension extends SimpleExtension
         }
 
         return $this->renderTemplate(
-            'openingTimes.twig',
+            'openingHours.twig',
             array(
                 "isOpen" => $currentlyOpen,
                 "opensToday" => $opensToday,
@@ -113,7 +113,7 @@ class OpeningHoursExtension extends SimpleExtension
     /**
      * @return string
      */
-    public function showOpeningTimesOverview()
+    public function showOpeningHoursOverview()
     {
         $todayDateTime = new \DateTime();
 
@@ -143,7 +143,7 @@ class OpeningHoursExtension extends SimpleExtension
         }
 
         return $this->renderTemplate(
-            'openingTimesOverview.twig',
+            'openingHoursOverview.twig',
             array(
                 "openingHours" => $openingHours,
                 "openingHoursGrouped" => $openingHoursGrouped,
