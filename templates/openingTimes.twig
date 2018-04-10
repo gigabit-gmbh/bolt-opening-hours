@@ -5,7 +5,7 @@
         <h3>Wir haben {{ opensNext.day }} ab <span class="time">{{ opensNext.hours.open }} Uhr</span> geöffnet.</h3>
     {% endif %}
     <table class="table table-responsive">
-        {% for day, opening in openingTimes %}
+        {% for day, opening in openingHours %}
             <tr>
                 <th>{{ day }}</th>
                 <td>{{ opening.open|simpleTime(displaySimpleTime) }} bis {{ opening.close|simpleTime(displaySimpleTime) }} Uhr</td>

@@ -58,25 +58,25 @@ class OpeningHoursExtension extends SimpleExtension
         $config = $this->getConfig();
         $openingHoursSections = $config["opening-hours"];
 
-        $openingTimes = array();
+        $openingHours = array();
 
         foreach ($openingHoursSections as $sectionName => $section) {
             $validFrom = new \DateTime($todayDateTime->format("Y")."-".$section["valid-from"]);
             $validTo = new \DateTime($todayDateTime->format("Y")."-".$section["valid-to"]);
 
             if ($validFrom < $todayDateTime && $validTo > $todayDateTime) {
-                $openingTimes = $section["times"];
+                $openingHours = $section["times"];
 
-                foreach ($openingTimes as $day => $openingHours) {
+                foreach ($openingHours as $day => $hours) {
                     $openingDay = new \DateTime($day." this week midnight");
-                    $this->compareNextOpeningHours($opensNext, $todayDate->diff($openingDay), $day, $openingHours);
+                    $this->compareNextOpeningHours($opensNext, $todayDate->diff($openingDay), $day, $hours);
 
                     if ($day === $currentDay && $this->isHoliday($todayDate->format("Y-m-d")) === false) {
-                        $openDate = new \DateTime($todayDateTime->format("Y-m-d ").$openingHours["open"].":00");
-                        $closeDate = new \DateTime($todayDateTime->format("Y-m-d ").$openingHours["close"].":00");
+                        $openDate = new \DateTime($todayDateTime->format("Y-m-d ").$hours["open"].":00");
+                        $closeDate = new \DateTime($todayDateTime->format("Y-m-d ").$hours["close"].":00");
                         if ($openDate < $todayDateTime && $closeDate > $todayDateTime) {
                             $opensToday["day"] = $day;
-                            $opensToday["hours"] = $openingHours;
+                            $opensToday["hours"] = $hours;
                             $currentlyOpen = true;
                         }
                     }
@@ -91,7 +91,7 @@ class OpeningHoursExtension extends SimpleExtension
                 "isOpen" => $currentlyOpen,
                 "opensToday" => $opensToday,
                 "opensNext" => $opensNext,
-                "openingTimes" => $openingTimes,
+                "openingHours" => $openingHours,
                 "displaySimpleTime" => $config["simpleTime"],
             )
         );
