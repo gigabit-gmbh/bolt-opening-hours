@@ -1,0 +1,30 @@
+opening-hours:
+    Summer:
+        valid-from: 04-01
+        valid-to: 10-01
+        times:
+          - Monday:
+              open: 07:00
+              close: 17:00
+          - Tuesday:
+              open: 07:00
+              close: 17:00
+          - Friday:
+              open: 07:00
+              close: 16:00
+          - Saturday:
+              open: 08:00
+              close: 12:00
+    Winter:
+        valid-from: 10-01
+        valid-to: 04-01
+        times:
+          - Monday:
+              open: 07:00
+              close: 17:00
+          - Tuesday:
+              open: 07:00
+              close: 17:00
+          - Friday:
+              open: 07:00
+              close: 16:00

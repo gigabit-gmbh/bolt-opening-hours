@@ -1,0 +1,26 @@
+<div class="wrap color-box dark-blue {% if isOpen %}open{% else %}closed{% endif %}">
+    {% if isOpen %}
+        <h3>Heute haben wir bis <span class="time">{{ opensToday.hours.close }} Uhr</span> geöffnet.</h3>
+    {% else %}
+        <h3>Wir haben {{ opensNext.day }} ab <span class="time">{{ opensNext.hours.open }} Uhr</span> geöffnet.</h3>
+    {% endif %}
+    <table class="table table-responsive">
+        {% for day, opening in openingTimes %}
+            <tr>
+                <th>{{ day }}</th>
+                <td>{{ opening.open|simpleTime(displaySimpleTime) }} bis {{ opening.close|simpleTime(displaySimpleTime) }} Uhr</td>
+            </tr>
+            {#
+            <tr class="next-open-day">
+                <th>Freitag:</th>
+                <td>7 bis 16 Uhr</td>
+            </tr>
+            <tr>
+                <th>Samstag:</th>
+                <td>8 bis 12 Uhr</td>
+            </tr>#}
+        {% endfor %}
+    </table>
+   {# <p>In den Wintermonaten haben wir
+        samstags geschlossen!</p>#}
+</div>
