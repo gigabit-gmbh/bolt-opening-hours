@@ -1,26 +1,63 @@
+{% macro showOpeningHoursRow(dayLabel, openTime, closeTime, opensNext) %}
+    <tr{% if opensNext %} class="next-open-day"{% endif %}>
+        <th>{{ dayLabel }}</th>
+        <td>{{ openTime }} bis {{ closeTime }} Uhr</td>
+    </tr>
+{% endmacro %}
+
+{% from _self import showOpeningHoursRow %}
+
 <div class="wrap color-box dark-blue {% if isOpen %}open{% else %}closed{% endif %}">
     {% if isOpen %}
         <h3>Heute haben wir bis <span class="time">{{ opensToday.hours.close }} Uhr</span> geöffnet.</h3>
     {% else %}
-        <h3>Wir haben {{ opensNext.day }} ab <span class="time">{{ opensNext.hours.open }} Uhr</span> geöffnet.</h3>
+        <h3>Wir haben {{ __(opensNext.day) }} ab <span class="time">{{ opensNext.hours.open }} Uhr</span> geöffnet.</h3>
     {% endif %}
     <table class="table table-responsive">
-        {% for day, opening in openingHours %}
-            <tr>
-                <th>{{ day }}</th>
-                <td>{{ opening.open|simpleTime(displaySimpleTime) }} bis {{ opening.close|simpleTime(displaySimpleTime) }} Uhr</td>
-            </tr>
-            {#
-            <tr class="next-open-day">
-                <th>Freitag:</th>
-                <td>7 bis 16 Uhr</td>
-            </tr>
-            <tr>
-                <th>Samstag:</th>
-                <td>8 bis 12 Uhr</td>
-            </tr>#}
-        {% endfor %}
+        {% if groupedDays %}
+            {% for group in openingHoursGrouped %}
+                {% set firstOpening = group|first %}
+                {% set lastOpening = group|last %}
+                {% set displayDay = firstOpening.day %}
+                {% if firstOpening.day != lastOpening.day %}
+                    {% if shortenGroupedDays %}
+                        {% set displayDay = __(displayDay ~ '.short') ~ " - " ~ __(lastOpening.day ~ '.short') %}
+                    {% else %}
+                        {% set displayDay = __(displayDay) ~ " - " ~ __(lastOpening.day) %}
+                    {% endif %}
+                {% else %}
+                    {% set displayDay = __(displayDay) %}
+                {% endif %}
+
+                {% set openTime = firstOpening.hours.open|simpleTime(displaySimpleTime) %}
+                {% set closeTime = firstOpening.hours.close|simpleTime(displaySimpleTime) %}
+
+                {% set opensNextDay = false %}
+                {% if isOpen == false %}
+                    {% for openingTime in group %}
+                        {% if openingTime.day == opensNext.day %}
+                            {% set opensNextDay = true %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {{ showOpeningHoursRow(displayDay, openTime, closeTime, opensNextDay) }}
+            {% endfor %}
+        {% else %}
+            {% for day, opening in openingHours %}
+                {% set openTime = opening.open|simpleTime(displaySimpleTime) %}
+                {% set closeTime = opening.close|simpleTime(displaySimpleTime) %}
+                {% set opensNextDay = false %}
+
+                {% if isOpen == false and opensNext.day == opening.day %}
+                    {% set opensNextDay = true %}
+                {% endif %}
+
+                {{ showOpeningHoursRow(__(day), openTime, closeTime, opensNextDay) }}
+            {% endfor %}
+        {% endif %}
     </table>
-   {# <p>In den Wintermonaten haben wir
-        samstags geschlossen!</p>#}
+    {% if additionalMessage|length > 0 %}
+        <p>{{ __(additionalMessage) }}</p>
+    {% endif %}
 </div>

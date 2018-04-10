@@ -59,17 +59,33 @@ class OpeningHoursExtension extends SimpleExtension
         $openingHoursSections = $config["opening-hours"];
 
         $openingHours = array();
+        $openingHoursGrouped = array();
 
         foreach ($openingHoursSections as $sectionName => $section) {
+            $validFromMonth = explode("-", $section["valid-from"])[0];
+            $validToMonth = explode("-", $section["valid-to"])[0];
+            $toYear = $todayDateTime->format("Y");
+            if ($validToMonth < $validFromMonth) {
+                $toYear = (intval($todayDateTime->format("Y")) + 1);
+            }
             $validFrom = new \DateTime($todayDateTime->format("Y")."-".$section["valid-from"]);
-            $validTo = new \DateTime($todayDateTime->format("Y")."-".$section["valid-to"]);
+            $validTo = new \DateTime($toYear."-".$section["valid-to"]);
 
             if ($validFrom < $todayDateTime && $validTo > $todayDateTime) {
-                $openingHours = $section["times"];
-
-                foreach ($openingHours as $day => $hours) {
+                foreach ($section["times"] as $day => $hours) {
                     $openingDay = new \DateTime($day." this week midnight");
                     $this->compareNextOpeningHours($opensNext, $todayDate->diff($openingDay), $day, $hours);
+
+                    if ($config["groupedDays"] && isset($hours["group"])) {
+                        if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
+                            $openingHoursGrouped[$hours["group"]] = array();
+                        }
+                        $openingHoursGrouped[$hours["group"]][] = array(
+                            "day" => $day,
+                            "hours" => $hours,
+                        );
+                    }
+                    $openingHours[$day] = $hours;
 
                     if ($day === $currentDay && $this->isHoliday($todayDate->format("Y-m-d")) === false) {
                         $openDate = new \DateTime($todayDateTime->format("Y-m-d ").$hours["open"].":00");
@@ -92,7 +108,11 @@ class OpeningHoursExtension extends SimpleExtension
                 "opensToday" => $opensToday,
                 "opensNext" => $opensNext,
                 "openingHours" => $openingHours,
+                "openingHoursGrouped" => $openingHoursGrouped,
                 "displaySimpleTime" => $config["simpleTime"],
+                "groupedDays" => $config["groupedDays"],
+                "shortenGroupedDays" => $config["shortenGroupedDays"],
+                "additionalMessage" => $config["additionalMessage"],
             )
         );
     }
@@ -114,7 +134,6 @@ class OpeningHoursExtension extends SimpleExtension
 
         return $time->format("G");
     }
-
 
     /**
      * @param array $opensNext The array with the opensNext definitions
