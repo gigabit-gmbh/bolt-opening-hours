@@ -1,0 +1,41 @@
+{% macro showOpeningHoursRow(dayLabel, openTime, closeTime) %}
+    <tr>
+        <th>{{ dayLabel }}</th>
+        <td>{{ openTime }} bis {{ closeTime }} Uhr</td>
+    </tr>
+{% endmacro %}
+
+{% from _self import showOpeningHoursRow %}
+
+<table class="table table-responsive">
+    {% if groupedDays %}
+        {% for group in openingHoursGrouped %}
+            {% set firstOpening = group|first %}
+            {% set lastOpening = group|last %}
+            {% set displayDay = firstOpening.day %}
+            {% if firstOpening.day != lastOpening.day %}
+                {% if shortenGroupedDays %}
+                    {% set displayDay = __(displayDay ~ '.short') ~ " - " ~ __(lastOpening.day ~ '.short') %}
+                {% else %}
+                    {% set displayDay = __(displayDay) ~ " - " ~ __(lastOpening.day) %}
+                {% endif %}
+            {% else %}
+                {% set displayDay = __(displayDay) %}
+            {% endif %}
+
+            {% set openTime = firstOpening.hours.open|simpleTime(displaySimpleTime) %}
+            {% set closeTime = firstOpening.hours.close|simpleTime(displaySimpleTime) %}
+
+            {{ showOpeningHoursRow(displayDay, openTime, closeTime) }}
+        {% endfor %}
+    {% else %}
+        {% for day, opening in openingHours %}
+            {% set openTime = opening.open|simpleTime(displaySimpleTime) %}
+            {% set closeTime = opening.close|simpleTime(displaySimpleTime) %}
+            {{ showOpeningHoursRow(__(day), openTime, closeTime) }}
+        {% endfor %}
+    {% endif %}
+</table>
+{% if additionalMessage|length > 0 %}
+    <p>{{ __(additionalMessage) }}</p>
+{% endif %}

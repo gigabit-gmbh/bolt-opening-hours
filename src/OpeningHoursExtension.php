@@ -19,6 +19,7 @@ class OpeningHoursExtension extends SimpleExtension
     {
         return [
             'openingTimes' => ['showOpeningTimes', ['is_safe' => ['html']]],
+            'openingTimesOverview' => ['showOpeningTimesOverview', ['is_safe' => ['html']]],
         ];
     }
 
@@ -62,16 +63,8 @@ class OpeningHoursExtension extends SimpleExtension
         $openingHoursGrouped = array();
 
         foreach ($openingHoursSections as $sectionName => $section) {
-            $validFromMonth = explode("-", $section["valid-from"])[0];
-            $validToMonth = explode("-", $section["valid-to"])[0];
-            $toYear = $todayDateTime->format("Y");
-            if ($validToMonth < $validFromMonth) {
-                $toYear = (intval($todayDateTime->format("Y")) + 1);
-            }
-            $validFrom = new \DateTime($todayDateTime->format("Y")."-".$section["valid-from"]);
-            $validTo = new \DateTime($toYear."-".$section["valid-to"]);
-
-            if ($validFrom < $todayDateTime && $validTo > $todayDateTime) {
+            $validDates = $this->getValidFromToDates($section, $todayDateTime);
+            if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
                 foreach ($section["times"] as $day => $hours) {
                     $openingDay = new \DateTime($day." this week midnight");
                     $this->compareNextOpeningHours($opensNext, $todayDate->diff($openingDay), $day, $hours);
@@ -118,6 +111,52 @@ class OpeningHoursExtension extends SimpleExtension
     }
 
     /**
+     * @return string
+     */
+    public function showOpeningTimesOverview()
+    {
+        $todayDateTime = new \DateTime();
+
+        $config = $this->getConfig();
+        $openingHoursSections = $config["opening-hours"];
+
+        $openingHours = array();
+        $openingHoursGrouped = array();
+
+        foreach ($openingHoursSections as $sectionName => $section) {
+            $validDates = $this->getValidFromToDates($section, $todayDateTime);
+            if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
+                foreach ($section["times"] as $day => $hours) {
+
+                    if ($config["groupedDays"] && isset($hours["group"])) {
+                        if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
+                            $openingHoursGrouped[$hours["group"]] = array();
+                        }
+                        $openingHoursGrouped[$hours["group"]][] = array(
+                            "day" => $day,
+                            "hours" => $hours,
+                        );
+                    }
+                    $openingHours[$day] = $hours;
+                }
+            }
+        }
+
+        return $this->renderTemplate(
+            'openingTimesOverview.twig',
+            array(
+                "openingHours" => $openingHours,
+                "openingHoursGrouped" => $openingHoursGrouped,
+                "displaySimpleTime" => $config["simpleTime"],
+                "groupedDays" => $config["groupedDays"],
+                "shortenGroupedDays" => $config["shortenGroupedDays"],
+                "additionalMessage" => $config["additionalMessage"],
+            )
+        );
+    }
+
+
+    /**
      * If simple is set to true, it removes the :xx from the time display
      *
      * @param string $input
@@ -133,6 +172,26 @@ class OpeningHoursExtension extends SimpleExtension
         $time->modify("today ".$input);
 
         return $time->format("G");
+    }
+
+    /**
+     * @param array $section
+     * @param \DateTime $today
+     *
+     * @return array
+     */
+    protected function getValidFromToDates($section, $today)
+    {
+        $validFromMonth = explode("-", $section["valid-from"])[0];
+        $validToMonth = explode("-", $section["valid-to"])[0];
+        $toYear = $today->format("Y");
+        if ($validToMonth < $validFromMonth) {
+            $toYear = (intval($today->format("Y")) + 1);
+        }
+        $validFrom = new \DateTime($today->format("Y")."-".$section["valid-from"]);
+        $validTo = new \DateTime($toYear."-".$section["valid-to"]);
+
+        return array("from" => $validFrom, "to" => $validTo);
     }
 
     /**
