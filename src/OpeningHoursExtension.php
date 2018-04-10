@@ -67,7 +67,13 @@ class OpeningHoursExtension extends SimpleExtension
             if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
                 foreach ($section["times"] as $day => $hours) {
                     $openingDay = new \DateTime($day." this week midnight");
-                    $this->compareNextOpeningHours($opensNext, $todayDate->diff($openingDay), $day, $hours);
+                    $this->compareNextOpeningHours(
+                        $opensNext,
+                        $todayDate->diff($openingDay),
+                        $day,
+                        $hours,
+                        $todayDateTime
+                    );
 
                     if ($config["groupedDays"] && isset($hours["group"])) {
                         if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
@@ -83,7 +89,7 @@ class OpeningHoursExtension extends SimpleExtension
                     if ($day === $currentDay && $this->isHoliday($todayDate->format("Y-m-d")) === false) {
                         $openDate = new \DateTime($todayDateTime->format("Y-m-d ").$hours["open"].":00");
                         $closeDate = new \DateTime($todayDateTime->format("Y-m-d ").$hours["close"].":00");
-                        if ($openDate < $todayDateTime && $closeDate > $todayDateTime) {
+                        if ($openDate <= $todayDateTime && $closeDate >= $todayDateTime) {
                             $opensToday["day"] = $day;
                             $opensToday["hours"] = $hours;
                             $currentlyOpen = true;
@@ -199,18 +205,27 @@ class OpeningHoursExtension extends SimpleExtension
      * @param \DateInterval $dayDiff Day Diff array from today to given data day
      * @param string $day Name of the data day
      * @param array $openingHours The Opening Hours of the data day
+     * @param \DateTime $today The current DateTime
      */
-    protected function compareNextOpeningHours(&$opensNext, $dayDiff, $day, $openingHours)
+    protected function compareNextOpeningHours(&$opensNext, $dayDiff, $day, $openingHours, $today)
     {
+        $setValues = false;
+
         if ($dayDiff->days === 0) {
-            return;
+            $openDate = new \DateTime($today->format("Y-m-d ").$openingHours["open"].":00");
+
+            // check if opening hour is before current time
+            if ($openDate > $today) {
+                $setValues = true;
+            } else {
+                return;
+            }
         }
+
         $diffInDays = $dayDiff->days;
         if ($dayDiff->invert) {
             $diffInDays = 7 - $diffInDays;
         }
-
-        $setValues = false;
         if ($opensNext["days"] === null) {
             $setValues = true;
         }
