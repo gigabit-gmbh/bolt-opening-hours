@@ -1,6 +1,6 @@
 {
-    "name": "gigabit/opening-hours",
-    "description": "A plugin to manage opening hours of a e.g. store",
+    "name": "gigabit/opening-times",
+    "description": "A plugin to manage opening times of a e.g. store",
     "type": "bolt-extension",
     "keywords": [
         "opening times",
