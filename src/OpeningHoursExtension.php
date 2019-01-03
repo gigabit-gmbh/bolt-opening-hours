@@ -190,12 +190,28 @@ class OpeningHoursExtension extends SimpleExtension
     {
         $validFromMonth = explode("-", $section["valid-from"])[0];
         $validToMonth = explode("-", $section["valid-to"])[0];
-        $toYear = $today->format("Y");
-        if ($validToMonth < $validFromMonth) {
-            $toYear = (intval($today->format("Y")) + 1);
+        $todayMonth = $today->format('m');
+        /** @var \DateTime $toYear */
+        $toYear = clone $today;
+
+        /** @var \DateTime $fromYear */
+        $fromYear = clone $today;
+
+        if ($validFromMonth > $todayMonth && $validToMonth > $todayMonth && $validFromMonth > $validToMonth) {
+            // e.g. current: 01, from: 10, to: 04
+            $fromYear->modify("-1 year");
         }
-        $validFrom = new \DateTime($today->format("Y")."-".$section["valid-from"]);
-        $validTo = new \DateTime($toYear."-".$section["valid-to"]);
+        if ($validFromMonth > $todayMonth && $validToMonth <= $todayMonth && $validFromMonth > $validToMonth) {
+            // e.g. current: 04, from: 10, to: 04
+            $toYear->modify("+1 year");
+        }
+        if ($validFromMonth <= $todayMonth && $validToMonth < $todayMonth && $validFromMonth > $validToMonth) {
+            // e.g. current: 10, from: 10, to: 04
+            $toYear->modify("+1 year");
+        }
+
+        $validFrom = new \DateTime($fromYear->format("Y")."-".$section["valid-from"]);
+        $validTo = new \DateTime($toYear->format("Y")."-".$section["valid-to"]);
 
         return array("from" => $validFrom, "to" => $validTo);
     }
