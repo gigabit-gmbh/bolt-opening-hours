@@ -12,6 +12,9 @@ use Bolt\Extension\SimpleExtension;
 class OpeningHoursExtension extends SimpleExtension
 {
 
+    protected const DEFAULT_TEMPLATE = 'openingHours.twig';
+    protected const DEFAULT_OVERVIEW_TEMPLATE = 'openingHoursOverview.twig';
+
     /**
      * {@inheritdoc}
      */
@@ -100,8 +103,13 @@ class OpeningHoursExtension extends SimpleExtension
             }
         }
 
+        $template = $this::DEFAULT_TEMPLATE;
+        if($config["templates"] && $config["templates"]["default"]){
+            $template = $config["templates"]["default"];
+        }
+
         return $this->renderTemplate(
-            'openingHours.twig',
+            $template,
             array(
                 "isOpen" => $currentlyOpen,
                 "opensToday" => $opensToday,
@@ -148,8 +156,13 @@ class OpeningHoursExtension extends SimpleExtension
             }
         }
 
+        $template = $this::DEFAULT_OVERVIEW_TEMPLATE;
+        if($config["templates"] && $config["templates"]["overview"]){
+            $template = $config["templates"]["overview"];
+        }
+
         return $this->renderTemplate(
-            'openingHoursOverview.twig',
+            $template,
             array(
                 "openingHours" => $openingHours,
                 "openingHoursGrouped" => $openingHoursGrouped,
@@ -306,6 +319,26 @@ class OpeningHoursExtension extends SimpleExtension
             return 'Stefanitag';
         } else {
             return $status;
+        }
+    }
+
+    /**
+     * Render a Twig template.
+     *
+     * @param string $template
+     * @param array  $context
+     *
+     * @return string
+     *
+     * @throws
+     */
+    protected function renderTemplate($template, array $context = [])
+    {
+        if($template === $this::DEFAULT_TEMPLATE || $template === $this::DEFAULT_OVERVIEW_TEMPLATE){
+            return parent::renderTemplate($template, $context);
+        }else{
+            $app = $this->getContainer();
+            return $app['twig']->render($template, $context);
         }
     }
 
