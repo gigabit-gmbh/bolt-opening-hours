@@ -279,15 +279,15 @@ class OpeningHoursExtension extends SimpleExtension
             return 'Heilige Drei Könige';
         } elseif ($datum[1].$datum[2] === $easter_m.$easter_d) {
             return 'Ostersonntag';
-        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 1, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 1)) {
             return 'Ostermontag';
-        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 39, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 39)) {
             return 'Christi Himmelfahrt';
-        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 49, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 49)) {
             return 'Pfingstsonntag';
-        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 50, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 50)) {
             return 'Pfingstmontag';
-        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 60, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 60)) {
             return 'Fronleichnam';
         } elseif ($datum[1].$datum[2] === '0501') {
             return 'Erster Mai';
@@ -304,6 +304,13 @@ class OpeningHoursExtension extends SimpleExtension
         } else {
             return $status;
         }
+    }
+
+    protected function getEasterDayMonth($year, $offset){
+        $easterDay = date("d", easter_date($year));
+        $easterMonth = date("m", easter_date($year));
+
+        return date("md", mktime(0, 0, 0, $easterMonth, $easterDay + $offset, $year));
     }
 
     /**
