@@ -271,38 +271,37 @@ class OpeningHoursExtension extends SimpleExtension
         $easter_d = date("d", easter_date($datum[0]));
         $easter_m = date("m", easter_date($datum[0]));
 
-        $status = false;
-
-        if ($datum[1].$datum[2] === '0101') {
-            return 'Neujahr';
-        } elseif ($datum[1].$datum[2] === '0106') {
-            return 'Heilige Drei Könige';
-        } elseif ($datum[1].$datum[2] === $easter_m.$easter_d) {
-            return 'Ostersonntag';
-        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 1)) {
-            return 'Ostermontag';
-        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 39)) {
-            return 'Christi Himmelfahrt';
-        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 49)) {
-            return 'Pfingstsonntag';
-        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 50)) {
-            return 'Pfingstmontag';
-        } elseif ($datum[1].$datum[2] === $this->getEasterDayMonth($datum[0], 60)) {
-            return 'Fronleichnam';
-        } elseif ($datum[1].$datum[2] === '0501') {
-            return 'Erster Mai';
-        } elseif ($datum[1].$datum[2] === '0815') {
-            return 'Mariä Himmelfahrt';
-        } elseif ($datum[1].$datum[2] === '1101') {
-            return 'Allerheiligen';
-        } elseif ($datum[1].$datum[2] === '1224') {
-            return 'Heiliger Abend';
-        } elseif ($datum[1].$datum[2] === '1225') {
-            return 'Christtag';
-        } elseif ($datum[1].$datum[2] === '1226') {
-            return 'Stefanitag';
-        } else {
-            return $status;
+        switch ($datum[1].$datum[2]){
+            case '0101':
+                return 'Neujahr';
+            case '0106':
+                return 'Heilige Drei Könige';
+            case $easter_m.$easter_d:
+                return 'Ostersonntag';
+            case $this->getEasterDayMonth($datum[0], 1):
+                return 'Ostermontag';
+            case $this->getEasterDayMonth($datum[0], 39):
+                return 'Christi Himmelfahrt';
+            case $this->getEasterDayMonth($datum[0], 49):
+                return 'Pfingstsonntag';
+            case $this->getEasterDayMonth($datum[0], 50):
+                return 'Pfingstmontag';
+            case $this->getEasterDayMonth($datum[0], 60):
+                return 'Fronleichnam';
+            case '0501':
+                return 'Erster Mai';
+            case '0815':
+                return 'Mariä Himmelfahrt';
+            case '1101':
+                return 'Allerheiligen';
+            case '1224':
+                return 'Heiliger Abend';
+            case '1225':
+                return 'Christtag';
+            case '1226':
+                return 'Stefanitag';
+            default:
+                return false;
         }
     }
 
