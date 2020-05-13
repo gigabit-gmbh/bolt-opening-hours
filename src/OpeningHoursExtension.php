@@ -78,15 +78,7 @@ class OpeningHoursExtension extends SimpleExtension
                         $todayDateTime
                     );
 
-                    if ($config["groupedDays"] && isset($hours["group"])) {
-                        if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
-                            $openingHoursGrouped[$hours["group"]] = array();
-                        }
-                        $openingHoursGrouped[$hours["group"]][] = array(
-                            "day" => $day,
-                            "hours" => $hours,
-                        );
-                    }
+                    $this->getGrouped($day, $config, $openingHoursGrouped);
                     $openingHours[$day] = $hours;
 
                     if ($day === $currentDay && $this->isHoliday($todayDate->format("Y-m-d")) === false) {
@@ -142,15 +134,7 @@ class OpeningHoursExtension extends SimpleExtension
             if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
                 foreach ($section["times"] as $day => $hours) {
 
-                    if ($config["groupedDays"] && isset($hours["group"])) {
-                        if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
-                            $openingHoursGrouped[$hours["group"]] = array();
-                        }
-                        $openingHoursGrouped[$hours["group"]][] = array(
-                            "day" => $day,
-                            "hours" => $hours,
-                        );
-                    }
+                    $this->getGrouped($day, $config, $openingHoursGrouped);
                     $openingHours[$day] = $hours;
                 }
             }
@@ -339,6 +323,18 @@ class OpeningHoursExtension extends SimpleExtension
         }else{
             $app = $this->getContainer();
             return $app['twig']->render($template, $context);
+        }
+    }
+
+    protected function getGrouped($day, $config, &$openingHoursGrouped){
+        if ($config["groupedDays"] && isset($hours["group"])) {
+            if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
+                $openingHoursGrouped[$hours["group"]] = array();
+            }
+            $openingHoursGrouped[$hours["group"]][] = array(
+                "day" => $day,
+                "hours" => $hours,
+            );
         }
     }
 
