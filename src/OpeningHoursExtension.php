@@ -78,7 +78,7 @@ class OpeningHoursExtension extends SimpleExtension
                         $todayDateTime
                     );
 
-                    $this->getGrouped($day, $config, $openingHoursGrouped);
+                    $this->getGrouped($day, $hours, $config, $openingHoursGrouped);
                     $openingHours[$day] = $hours;
 
                     if ($day === $currentDay && $this->isHoliday($todayDate->format("Y-m-d")) === false) {
@@ -132,7 +132,7 @@ class OpeningHoursExtension extends SimpleExtension
             $validDates = $this->getValidFromToDates($section, $todayDateTime);
             if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
                 foreach ($section["times"] as $day => $hours) {
-                    $this->getGrouped($day, $config, $openingHoursGrouped);
+                    $this->getGrouped($day, $hours, $config, $openingHoursGrouped);
                     $openingHours[$day] = $hours;
                 }
             }
@@ -334,10 +334,11 @@ class OpeningHoursExtension extends SimpleExtension
 
     /**
      * @param $day
+     * @param $hours
      * @param $config
      * @param $openingHoursGrouped
      */
-    protected function getGrouped($day, $config, &$openingHoursGrouped)
+    protected function getGrouped($day, $hours, $config, &$openingHoursGrouped)
     {
         if ($config["groupedDays"] && isset($hours["group"])) {
             if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
