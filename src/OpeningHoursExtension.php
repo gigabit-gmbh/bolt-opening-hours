@@ -188,10 +188,9 @@ class OpeningHoursExtension extends SimpleExtension
         $validFromMonth = explode("-", $section["valid-from"])[0];
         $validToMonth = explode("-", $section["valid-to"])[0];
         $todayMonth = $today->format('m');
-        /** @var \DateTime $toYear */
+
         $toYear = clone $today;
 
-        /** @var \DateTime $fromYear */
         $fromYear = clone $today;
 
         if ($validFromMonth > $todayMonth && $validToMonth > $todayMonth && $validFromMonth > $validToMonth) {
@@ -225,7 +224,8 @@ class OpeningHoursExtension extends SimpleExtension
         $setValues = false;
 
         if ($dayDiff->days === 0) {
-            $openDate = new \DateTime($today->format("Y-m-d ").$openingHours["open"].":00");
+            $compareDate = $today->format("Y-m-d ").$openingHours["open"].":00";
+            $openDate = new \DateTime($compareDate);
 
             // check if opening hour is before current time
             if ($openDate > $today) {
