@@ -273,33 +273,33 @@ class OpeningHoursExtension extends SimpleExtension
 
         $status = false;
 
-        if ($datum[1].$datum[2] == '0101') {
+        if ($datum[1].$datum[2] === '0101') {
             return 'Neujahr';
-        } elseif ($datum[1].$datum[2] == '0106') {
+        } elseif ($datum[1].$datum[2] === '0106') {
             return 'Heilige Drei Könige';
-        } elseif ($datum[1].$datum[2] == $easter_m.$easter_d) {
+        } elseif ($datum[1].$datum[2] === $easter_m.$easter_d) {
             return 'Ostersonntag';
-        } elseif ($datum[1].$datum[2] == date("md", mktime(0, 0, 0, $easter_m, $easter_d + 1, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 1, $datum[0]))) {
             return 'Ostermontag';
-        } elseif ($datum[1].$datum[2] == date("md", mktime(0, 0, 0, $easter_m, $easter_d + 39, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 39, $datum[0]))) {
             return 'Christi Himmelfahrt';
-        } elseif ($datum[1].$datum[2] == date("md", mktime(0, 0, 0, $easter_m, $easter_d + 49, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 49, $datum[0]))) {
             return 'Pfingstsonntag';
-        } elseif ($datum[1].$datum[2] == date("md", mktime(0, 0, 0, $easter_m, $easter_d + 50, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 50, $datum[0]))) {
             return 'Pfingstmontag';
-        } elseif ($datum[1].$datum[2] == date("md", mktime(0, 0, 0, $easter_m, $easter_d + 60, $datum[0]))) {
+        } elseif ($datum[1].$datum[2] === date("md", mktime(0, 0, 0, $easter_m, $easter_d + 60, $datum[0]))) {
             return 'Fronleichnam';
-        } elseif ($datum[1].$datum[2] == '0501') {
+        } elseif ($datum[1].$datum[2] === '0501') {
             return 'Erster Mai';
-        } elseif ($datum[1].$datum[2] == '0815') {
+        } elseif ($datum[1].$datum[2] === '0815') {
             return 'Mariä Himmelfahrt';
-        } elseif ($datum[1].$datum[2] == '1101') {
+        } elseif ($datum[1].$datum[2] === '1101') {
             return 'Allerheiligen';
-        } elseif ($datum[1].$datum[2] == '1224') {
+        } elseif ($datum[1].$datum[2] === '1224') {
             return 'Heiliger Abend';
-        } elseif ($datum[1].$datum[2] == '1225') {
+        } elseif ($datum[1].$datum[2] === '1225') {
             return 'Christtag';
-        } elseif ($datum[1].$datum[2] == '1226') {
+        } elseif ($datum[1].$datum[2] === '1226') {
             return 'Stefanitag';
         } else {
             return $status;
@@ -318,12 +318,13 @@ class OpeningHoursExtension extends SimpleExtension
      */
     protected function renderTemplate($template, array $context = [])
     {
-        if($template === $this::DEFAULT_TEMPLATE || $template === $this::DEFAULT_OVERVIEW_TEMPLATE){
+        if($template === self::DEFAULT_TEMPLATE || $template === self::DEFAULT_OVERVIEW_TEMPLATE){
             return parent::renderTemplate($template, $context);
-        }else{
-            $app = $this->getContainer();
-            return $app['twig']->render($template, $context);
         }
+
+        $app = $this->getContainer();
+
+        return $app['twig']->render($template, $context);
     }
 
     protected function getGrouped($day, $config, &$openingHoursGrouped){

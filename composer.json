@@ -10,7 +10,8 @@
         "opening hours"
     ],
     "require": {
-        "bolt/bolt": "^3.0"
+        "bolt/bolt": "^3.0",
+        "ext-calendar": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.7"
