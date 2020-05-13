@@ -69,7 +69,7 @@ class OpeningHoursExtension extends SimpleExtension
             $validDates = $this->getValidFromToDates($section, $todayDateTime);
             if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
                 foreach ($section["times"] as $day => $hours) {
-                    $openingDay = new \DateTime($day." this week midnight");
+                    $openingDay = new \DateTime($day . " this week midnight");
                     $this->compareNextOpeningHours(
                         $opensNext,
                         $todayDate->diff($openingDay),
@@ -82,21 +82,20 @@ class OpeningHoursExtension extends SimpleExtension
                     $openingHours[$day] = $hours;
 
                     if ($day === $currentDay && $this->isHoliday($todayDate->format("Y-m-d")) === false) {
-                        $openDate = new \DateTime($todayDateTime->format("Y-m-d ").$hours["open"].":00");
-                        $closeDate = new \DateTime($todayDateTime->format("Y-m-d ").$hours["close"].":00");
+                        $openDate = new \DateTime($todayDateTime->format("Y-m-d ") . $hours["open"] . ":00");
+                        $closeDate = new \DateTime($todayDateTime->format("Y-m-d ") . $hours["close"] . ":00");
                         if ($openDate <= $todayDateTime && $closeDate >= $todayDateTime) {
                             $opensToday["day"] = $day;
                             $opensToday["hours"] = $hours;
                             $currentlyOpen = true;
                         }
                     }
-
                 }
             }
         }
 
         $template = $this::DEFAULT_TEMPLATE;
-        if(array_key_exists('templates', $config) && array_key_exists('default', $config["templates"])){
+        if (array_key_exists('templates', $config) && array_key_exists('default', $config["templates"])) {
             $template = $config["templates"]["default"];
         }
 
@@ -133,7 +132,6 @@ class OpeningHoursExtension extends SimpleExtension
             $validDates = $this->getValidFromToDates($section, $todayDateTime);
             if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
                 foreach ($section["times"] as $day => $hours) {
-
                     $this->getGrouped($day, $config, $openingHoursGrouped);
                     $openingHours[$day] = $hours;
                 }
@@ -141,7 +139,7 @@ class OpeningHoursExtension extends SimpleExtension
         }
 
         $template = $this::DEFAULT_OVERVIEW_TEMPLATE;
-        if(array_key_exists('templates', $config) && array_key_exists('templates', $config["overview"])){
+        if (array_key_exists('templates', $config) && array_key_exists('templates', $config["overview"])) {
             $template = $config["templates"]["overview"];
         }
 
@@ -172,7 +170,7 @@ class OpeningHoursExtension extends SimpleExtension
             return $input;
         }
         $time = new \DateTime();
-        $time->modify("today ".$input);
+        $time->modify("today " . $input);
 
         return $time->format("G");
     }
@@ -206,8 +204,8 @@ class OpeningHoursExtension extends SimpleExtension
             $toYear->modify("+1 year");
         }
 
-        $validFrom = new \DateTime($fromYear->format("Y")."-".$section["valid-from"]);
-        $validTo = new \DateTime($toYear->format("Y")."-".$section["valid-to"]);
+        $validFrom = new \DateTime($fromYear->format("Y") . "-" . $section["valid-from"]);
+        $validTo = new \DateTime($toYear->format("Y") . "-" . $section["valid-to"]);
 
         return array("from" => $validFrom, "to" => $validTo);
     }
@@ -224,7 +222,7 @@ class OpeningHoursExtension extends SimpleExtension
         $setValues = false;
 
         if ($dayDiff->days === 0) {
-            $compareDate = $today->format("Y-m-d ").$openingHours["open"].":00";
+            $compareDate = $today->format("Y-m-d ") . $openingHours["open"] . ":00";
             $openDate = new \DateTime($compareDate);
 
             // check if opening hour is before current time
@@ -271,12 +269,12 @@ class OpeningHoursExtension extends SimpleExtension
         $easter_d = date("d", easter_date($datum[0]));
         $easter_m = date("m", easter_date($datum[0]));
 
-        switch ($datum[1].$datum[2]){
+        switch ($datum[1] . $datum[2]) {
             case '0101':
                 return 'Neujahr';
             case '0106':
                 return 'Heilige Drei Könige';
-            case $easter_m.$easter_d:
+            case $easter_m . $easter_d:
                 return 'Ostersonntag';
             case $this->getEasterDayMonth($datum[0], 1):
                 return 'Ostermontag';
@@ -305,7 +303,8 @@ class OpeningHoursExtension extends SimpleExtension
         }
     }
 
-    protected function getEasterDayMonth($year, $offset){
+    protected function getEasterDayMonth($year, $offset)
+    {
         $easterDay = date("d", easter_date($year));
         $easterMonth = date("m", easter_date($year));
 
@@ -316,7 +315,7 @@ class OpeningHoursExtension extends SimpleExtension
      * Render a Twig template.
      *
      * @param string $template
-     * @param array  $context
+     * @param array $context
      *
      * @return string
      *
@@ -324,7 +323,7 @@ class OpeningHoursExtension extends SimpleExtension
      */
     protected function renderTemplate($template, array $context = [])
     {
-        if($template === self::DEFAULT_TEMPLATE || $template === self::DEFAULT_OVERVIEW_TEMPLATE){
+        if ($template === self::DEFAULT_TEMPLATE || $template === self::DEFAULT_OVERVIEW_TEMPLATE) {
             return parent::renderTemplate($template, $context);
         }
 
@@ -333,7 +332,13 @@ class OpeningHoursExtension extends SimpleExtension
         return $app['twig']->render($template, $context);
     }
 
-    protected function getGrouped($day, $config, &$openingHoursGrouped){
+    /**
+     * @param $day
+     * @param $config
+     * @param $openingHoursGrouped
+     */
+    protected function getGrouped($day, $config, &$openingHoursGrouped)
+    {
         if ($config["groupedDays"] && isset($hours["group"])) {
             if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
                 $openingHoursGrouped[$hours["group"]] = array();
