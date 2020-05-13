@@ -104,7 +104,7 @@ class OpeningHoursExtension extends SimpleExtension
         }
 
         $template = $this::DEFAULT_TEMPLATE;
-        if($config["templates"] && $config["templates"]["default"]){
+        if(array_key_exists('templates', $config) && array_key_exists('default', $config["templates"])){
             $template = $config["templates"]["default"];
         }
 
@@ -157,7 +157,7 @@ class OpeningHoursExtension extends SimpleExtension
         }
 
         $template = $this::DEFAULT_OVERVIEW_TEMPLATE;
-        if($config["templates"] && $config["templates"]["overview"]){
+        if(array_key_exists('templates', $config) && array_key_exists('templates', $config["overview"])){
             $template = $config["templates"]["overview"];
         }
 
