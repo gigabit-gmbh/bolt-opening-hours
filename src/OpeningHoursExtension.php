@@ -185,7 +185,9 @@ class OpeningHoursExtension extends SimpleExtension
     {
         $validFromMonth = explode("-", $section["valid-from"])[0];
         $validToMonth = explode("-", $section["valid-to"])[0];
+        $validToDay = explode("-", $section["valid-to"])[1];
         $todayMonth = $today->format('m');
+        $todayDay = $today->format('d');
 
         $toYear = clone $today;
 
@@ -198,6 +200,10 @@ class OpeningHoursExtension extends SimpleExtension
         if ($validFromMonth > $todayMonth && $validToMonth <= $todayMonth && $validFromMonth > $validToMonth) {
             // e.g. current: 04, from: 10, to: 04
             $toYear->modify("+1 year");
+        }
+        if ($validFromMonth > $todayMonth && $validToMonth <= $todayMonth && $validToDay > $todayDay) {
+            // e.g. current: 03-05, from: 11-15, to: 03-20
+            $fromYear->modify("-1 year");
         }
         if ($validFromMonth <= $todayMonth && $validToMonth < $todayMonth && $validFromMonth > $validToMonth) {
             // e.g. current: 10, from: 10, to: 04
