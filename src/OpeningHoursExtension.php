@@ -129,8 +129,12 @@ class OpeningHoursExtension extends SimpleExtension
         $openingHoursGrouped = array();
 
         foreach ($openingHoursSections as $sectionName => $section) {
+            var_dump($sectionName);
             $validDates = $this->getValidFromToDates($section, $todayDateTime);
             if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
+                var_dump($validDates["from"]);
+                var_dump($validDates["to"]);
+                var_dump($section["times"]);
                 foreach ($section["times"] as $day => $hours) {
                     $this->getGrouped($day, $hours, $config, $openingHoursGrouped);
                     $openingHours[$day] = $hours;
@@ -194,21 +198,8 @@ class OpeningHoursExtension extends SimpleExtension
 
         $fromYear = clone $today;
 
-        if ($validFromMonth > $todayMonth && $validToMonth > $todayMonth && $validFromMonth > $validToMonth) {
-            // e.g. current: 01, from: 10, to: 04
-            $fromYear->modify("-1 year");
-        }
-        if ($validFromMonth > $todayMonth && $validToMonth <= $todayMonth && $validFromMonth > $validToMonth) {
-            // e.g. current: 04, from: 10, to: 04
-            $toYear->modify("+1 year");
-        }
-
-        if ($validFromMonth > $todayMonth && $validToMonth <= $todayMonth && $validToDay > $todayDay) {
-            // e.g. current: 04, from: 10, to: 04
-            $fromYear->modify("-1 year");
-        }
-        if ($validFromMonth <= $todayMonth && $validToMonth < $todayMonth && $validFromMonth > $validToMonth) {
-            // e.g. current: 10, from: 10, to: 04
+        if($validFromMonth > $validToMonth) {
+            // from should be next year
             $toYear->modify("+1 year");
         }
 
