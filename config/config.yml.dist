@@ -8,24 +8,38 @@ opening-hours:
     valid-to: 10-01
     times:
       Monday:
-        open: 07:00
-        close: 17:00
-        group: 1
+        slots:
+          - open: 07:00
+            close: 12:00
+          - open: 13:00
+            close: 16:30
       Tuesday:
-        open: 07:00
-        close: 17:00
+        slots:
+          - open: 07:00
+            close: 12:00
+          - open: 13:00
+            close: 16:30
         group: 1
       Wednesday:
-        open: 07:00
-        close: 17:00
+        slots:
+          - open: 07:00
+            close: 12:00
+          - open: 13:00
+            close: 16:30
         group: 1
       Thursday:
-        open: 07:00
-        close: 17:00
+        slots:
+          - open: 07:00
+            close: 12:00
+          - open: 13:00
+            close: 16:30
         group: 1
       Friday:
-        open: 07:00
-        close: 16:00
+        slots:
+          - open: 07:00
+            close: 12:00
+          - open: 13:00
+            close: 16:00
         group: 2
       Saturday:
         open: 08:00

@@ -1,32 +1,23 @@
-{% macro showOpeningHoursRow(dayLabel, openTime, closeTime) %}
-    <tr>
-        <th>{{ dayLabel }}</th>
-        <td>{{ openTime }} bis {{ closeTime }} Uhr</td>
-    </tr>
-{% endmacro %}
-
-{% from _self import showOpeningHoursRow %}
+{% from "_partials/hour_rows.twig" import showOpeningHoursRow %}
 
 <table class="table table-responsive">
     {% if groupedDays %}
         {% for group in openingHoursGrouped %}
-            {% set firstOpening = group|first %}
-            {% set lastOpening = group|last %}
-            {% set displayDay = firstOpening.day %}
-            {% if firstOpening.day != lastOpening.day %}
+            {% set firstOpeningDay = group|keys|first %}
+            {% set lastOpeningDay = group|keys|last %}
+
+            {% set displayDay = firstOpeningDay %}
+            {% if firstOpeningDay != lastOpeningDay %}
                 {% if shortenGroupedDays %}
-                    {% set displayDay = __(displayDay ~ '.short') ~ " - " ~ __(lastOpening.day ~ '.short') %}
+                    {% set displayDay = __(displayDay ~ '.short') ~ " - " ~ __(lastOpeningDay ~ '.short') %}
                 {% else %}
-                    {% set displayDay = __(displayDay) ~ " - " ~ __(lastOpening.day) %}
+                    {% set displayDay = __(displayDay) ~ " - " ~ __(lastOpeningDay) %}
                 {% endif %}
             {% else %}
                 {% set displayDay = __(displayDay) %}
             {% endif %}
 
-            {% set openTime = firstOpening.hours.open|simpleTime(displaySimpleTime) %}
-            {% set closeTime = firstOpening.hours.close|simpleTime(displaySimpleTime) %}
-
-            {{ showOpeningHoursRow(displayDay, openTime, closeTime) }}
+            {{ showOpeningHoursRow(displayDay, group|first, group|last) }}
         {% endfor %}
     {% else %}
         {% for day, opening in openingHours %}

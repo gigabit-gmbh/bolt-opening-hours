@@ -55,8 +55,8 @@ class OpeningHoursExtension extends SimpleExtension
         $todayDate = new \DateTime("today midnight");
 
         $currentlyOpen = false;
-        $opensToday = array("day" => null, "hours" => null);
-        $opensNext = array("days" => null, "day" => null, "hours" => null);
+        $opensToday = array("day" => null, "closeTime" => null);
+        $opensNext = array("days" => null, "day" => null, "hours" => null, "nextWithinToday" => false);
 
         $currentDay = $todayDateTime->format("l");
         $config = $this->getConfig();
@@ -70,23 +70,25 @@ class OpeningHoursExtension extends SimpleExtension
             if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
                 foreach ($section["times"] as $day => $hours) {
                     $openingDay = new \DateTime($day . " this week midnight");
-                    $this->compareNextOpeningHours(
+                    $validHours = $this->compareNextOpeningHours(
                         $opensNext,
                         $todayDate->diff($openingDay),
                         $day,
                         $hours,
-                        $todayDateTime
+                        $todayDateTime,
+                        $openingDay
                     );
 
                     $this->getGrouped($day, $hours, $config, $openingHoursGrouped);
                     $openingHours[$day] = $hours;
 
                     if ($day === $currentDay && $this->isHoliday($todayDate->format("Y-m-d")) === false) {
-                        $openDate = new \DateTime($todayDateTime->format("Y-m-d ") . $hours["open"] . ":00");
-                        $closeDate = new \DateTime($todayDateTime->format("Y-m-d ") . $hours["close"] . ":00");
+                        $openDate = $validHours['open'];
+                        $closeDate = $validHours['close'];
+
                         if ($openDate <= $todayDateTime && $closeDate >= $todayDateTime) {
                             $opensToday["day"] = $day;
-                            $opensToday["hours"] = $hours;
+                            $opensToday["closeTime"] = $closeDate->format('H:i');
                             $currentlyOpen = true;
                         }
                     }
@@ -129,12 +131,8 @@ class OpeningHoursExtension extends SimpleExtension
         $openingHoursGrouped = array();
 
         foreach ($openingHoursSections as $sectionName => $section) {
-            var_dump($sectionName);
             $validDates = $this->getValidFromToDates($section, $todayDateTime);
             if ($validDates["from"] < $todayDateTime && $validDates["to"] > $todayDateTime) {
-                var_dump($validDates["from"]);
-                var_dump($validDates["to"]);
-                var_dump($section["times"]);
                 foreach ($section["times"] as $day => $hours) {
                     $this->getGrouped($day, $hours, $config, $openingHoursGrouped);
                     $openingHours[$day] = $hours;
@@ -198,7 +196,7 @@ class OpeningHoursExtension extends SimpleExtension
 
         $fromYear = clone $today;
 
-        if($validFromMonth > $validToMonth) {
+        if ($validFromMonth > $validToMonth) {
             // from should be next year
             $toYear->modify("+1 year");
         }
@@ -216,19 +214,55 @@ class OpeningHoursExtension extends SimpleExtension
      * @param array $openingHours The Opening Hours of the data day
      * @param \DateTime $today The current DateTime
      */
-    protected function compareNextOpeningHours(&$opensNext, $dayDiff, $day, $openingHours, $today)
+    protected function compareNextOpeningHours(&$opensNext, $dayDiff, $day, $openingHours, $today, $openingDay)
     {
         $setValues = false;
+        $setToday = false;
+
+        $validOpenDate = clone $openingDay;
+        $validCloseDate = clone $openingDay;
 
         if ($dayDiff->days === 0) {
-            $compareDate = $today->format("Y-m-d ") . $openingHours["open"] . ":00";
-            $openDate = new \DateTime($compareDate);
+            $currentHour = intval($today->format('H'));
+
+            if (array_key_exists("slots", $openingHours)) {
+                $loop = 0;
+                $validCloseHour = 0;
+                foreach ($openingHours['slots'] as $slot) {
+                    $timeSplitOpen = preg_split("/:/", $slot["open"]);
+                    $timeSplitClose = preg_split("/:/", $slot["close"]);
+
+                    if ($loop === 0) {
+                        $validOpenDate->setTime($timeSplitOpen[0], $timeSplitOpen[1]);
+                        $validCloseDate->setTime($timeSplitClose[0], $timeSplitClose[1]);
+                    } else {
+                        if (count($openingHours['slots']) > $loop) {
+                            if ($currentHour >= $validCloseHour) {
+                                $validOpenDate->setTime($timeSplitOpen[0], $timeSplitOpen[1]);
+                                $validCloseDate->setTime($timeSplitClose[0], $timeSplitClose[1]);
+                            }
+                        }
+                    }
+                    $validCloseHour = intval($timeSplitClose[0]);
+                    $loop++;
+                }
+            } else {
+                $timeSplitOpen = preg_split("/:/", $openingHours["open"]);
+                $timeSplitClose = preg_split("/:/", $openingHours["close"]);
+                $validOpenDate->setTime($timeSplitOpen[0], $timeSplitOpen[1]);
+                $validCloseDate->setTime($timeSplitClose[0], $timeSplitClose[1]);
+            }
 
             // check if opening hour is before current time
-            if ($openDate > $today) {
-                $setValues = true;
+            if ($today >= $validOpenDate && $today < $validCloseDate) {
+                // currently opened
+                return [
+                    "open" => $validOpenDate,
+                    "close" => $validCloseDate
+                ];
             } else {
-                return;
+                // currently closed
+                $setValues = true;
             }
         }
 
@@ -242,11 +276,45 @@ class OpeningHoursExtension extends SimpleExtension
         if ($opensNext["days"] > $diffInDays && $setValues === false) {
             $setValues = true;
         }
+
+        if ($validCloseDate < $today && $openingDay->format("d.m.Y") === $today->format("d.m.Y")) {
+            $setValues = false;
+        } else {
+            if ($validOpenDate->format("d.m.Y") === $today->format("d.m.Y")) {
+                $setToday = true;
+            }
+        }
+
         if ($setValues) {
             $opensNext["days"] = $diffInDays;
             $opensNext["day"] = $day;
-            $opensNext["hours"] = $openingHours;
-        }
+            if (array_key_exists("slots", $openingHours)) {
+                $opensNext["hours"] = null;
+                foreach ($openingHours["slots"] as $slot) {
+                    $testDateOpen = clone $today;
+                    $testDateClose = clone $today;
+                    $timeSplitOpen = preg_split("/:/", $slot["open"]);
+                    $timeSplitClose = preg_split("/:/", $slot["close"]);
+
+                    $testDateOpen->setTime($timeSplitOpen[0], $timeSplitOpen[1]);
+                    $testDateClose->setTime($timeSplitClose[0], $timeSplitClose[1]);
+                    $testDateOpen->modify('+' . $diffInDays . " days");
+                    $testDateClose->modify('+' . $diffInDays . " days");
+
+                    if ($testDateOpen >= $today && $today < $testDateClose && $opensNext["hours"] === null) {
+                        $opensNext["hours"] = $slot;
+                    }
+                }
+            } else {
+                $opensNext["hours"] = $openingHours;
+            }
+            $opensNext["nextWithinToday"] = $setToday;
+        };
+
+        return [
+            "open" => $validOpenDate,
+            "close" => $validCloseDate
+        ];
     }
 
     /**
@@ -339,14 +407,29 @@ class OpeningHoursExtension extends SimpleExtension
      */
     protected function getGrouped($day, $hours, $config, &$openingHoursGrouped)
     {
-        if ($config["groupedDays"] && isset($hours["group"])) {
-            if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
-                $openingHoursGrouped[$hours["group"]] = array();
+        if (false === ($config["groupedDays"] && isset($hours["group"]))) {
+            return false;
+        }
+        if (array_key_exists($hours["group"], $openingHoursGrouped) === false) {
+            $openingHoursGrouped[$hours["group"]] = array();
+        }
+
+        if (array_key_exists($day, $openingHoursGrouped[$hours["group"]]) === false) {
+            $openingHoursGrouped[$hours["group"]][$day] = array();
+        }
+
+        if (array_key_exists("slots", $hours)) {
+            foreach ($hours['slots'] as $slot) {
+                $openingHoursGrouped[$hours["group"]][$day][] = [
+                    'open' => $slot['open'],
+                    'close' => $slot['close'],
+                ];
             }
-            $openingHoursGrouped[$hours["group"]][] = array(
-                "day" => $day,
-                "hours" => $hours,
-            );
+        } else {
+            $openingHoursGrouped[$hours["group"]][$day][] = [
+                'open' => $hours['open'],
+                'close' => $hours['close'],
+            ];
         }
     }
 

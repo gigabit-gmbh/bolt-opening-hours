@@ -1,36 +1,35 @@
-{% macro showOpeningHoursRow(dayLabel, openTime, closeTime, opensNext) %}
-    <tr{% if opensNext %} class="next-open-day"{% endif %}>
-        <th>{{ dayLabel }}</th>
-        <td>{{ openTime }} bis {{ closeTime }} Uhr</td>
-    </tr>
-{% endmacro %}
-
-{% from _self import showOpeningHoursRow %}
+{% from "_partials/hour_rows.twig" import showOpeningHoursRow %}
 
 <div class="wrap color-box dark-blue {% if isOpen %}open{% else %}closed{% endif %}">
     {% if isOpen %}
-        <h3>Heute haben wir bis <span class="time">{{ opensToday.hours.close }} Uhr</span> geöffnet.</h3>
+        <h3><span class="time">geöffnet</span></h3>
     {% else %}
-        <h3>Wir haben {{ __(opensNext.day) }} ab <span class="time">{{ opensNext.hours.open }} Uhr</span> geöffnet.</h3>
+        {% if opensNext.nextWithinToday %}
+            <h3>Heute ab <span class="time">{{ opensNext.hours.open }} Uhr</span> geöffnet.</h3>
+        {% else %}
+            <h3>Wir haben {{ __(opensNext.day) }} ab <span class="time">{{ opensNext.hours.open }} Uhr</span> geöffnet.
+            </h3>
+        {% endif %}
     {% endif %}
+
     <table class="table table-responsive">
         {% if groupedDays %}
             {% for group in openingHoursGrouped %}
+                {% set firstOpeningDay = group|keys|first %}
+                {% set lastOpeningDay = group|keys|last %}
+
                 {% set firstOpening = group|first %}
                 {% set lastOpening = group|last %}
-                {% set displayDay = firstOpening.day %}
-                {% if firstOpening.day != lastOpening.day %}
+                {% set displayDay = firstOpeningDay %}
+                {% if firstOpeningDay != lastOpeningDay %}
                     {% if shortenGroupedDays %}
-                        {% set displayDay = __(displayDay ~ '.short') ~ " - " ~ __(lastOpening.day ~ '.short') %}
+                        {% set displayDay = __(displayDay ~ '.short') ~ " - " ~ __(lastOpeningDay ~ '.short') %}
                     {% else %}
-                        {% set displayDay = __(displayDay) ~ " - " ~ __(lastOpening.day) %}
+                        {% set displayDay = __(displayDay) ~ " - " ~ __(lastOpeningDay) %}
                     {% endif %}
                 {% else %}
                     {% set displayDay = __(displayDay) %}
                 {% endif %}
-
-                {% set openTime = firstOpening.hours.open|simpleTime(displaySimpleTime) %}
-                {% set closeTime = firstOpening.hours.close|simpleTime(displaySimpleTime) %}
 
                 {% set opensNextDay = false %}
                 {% if isOpen == false %}
@@ -41,7 +40,7 @@
                     {% endfor %}
                 {% endif %}
 
-                {{ showOpeningHoursRow(displayDay, openTime, closeTime, opensNextDay) }}
+                {{ showOpeningHoursRow(displayDay, group|first, group|last, opensNextDay) }}
             {% endfor %}
         {% else %}
             {% for day, opening in openingHours %}

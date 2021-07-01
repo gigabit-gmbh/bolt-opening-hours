@@ -1,0 +1,13 @@
+{% macro showOpeningHoursRow(dayLabel, openTimeSlots, closeTimeSlots, opensNext = false) %}
+    <tr{% if opensNext %} class="next-open-day"{% endif %}>
+        <th>{{ dayLabel }}</th>
+        <td>
+            {% for key, openTimeSlot in openTimeSlots %}
+                {% set openTime = openTimeSlot.open|simpleTime(displaySimpleTime) %}
+                {% set closeTime = closeTimeSlots[key].close|simpleTime(displaySimpleTime) %}
+                {{ openTime }} bis {{ closeTime }} Uhr
+                {% if loop.last == false %}<br/>{% endif %}
+            {% endfor %}
+        </td>
+    </tr>
+{% endmacro %}
