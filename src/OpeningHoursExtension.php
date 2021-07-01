@@ -172,7 +172,7 @@ class OpeningHoursExtension extends SimpleExtension
         $time = new \DateTime();
         $time->modify("today " . $input);
 
-        return $time->format("G");
+        return $time->format("G:i");
     }
 
     /**
@@ -185,6 +185,7 @@ class OpeningHoursExtension extends SimpleExtension
     {
         $validFromMonth = explode("-", $section["valid-from"])[0];
         $validToMonth = explode("-", $section["valid-to"])[0];
+        $validFromDay = explode("-", $section["valid-from"])[1];
         $validToDay = explode("-", $section["valid-to"])[1];
         $todayMonth = $today->format('m');
         $todayDay = $today->format('d');
@@ -201,8 +202,9 @@ class OpeningHoursExtension extends SimpleExtension
             // e.g. current: 04, from: 10, to: 04
             $toYear->modify("+1 year");
         }
+
         if ($validFromMonth > $todayMonth && $validToMonth <= $todayMonth && $validToDay > $todayDay) {
-            // e.g. current: 03-05, from: 11-15, to: 03-20
+            // e.g. current: 04, from: 10, to: 04
             $fromYear->modify("-1 year");
         }
         if ($validFromMonth <= $todayMonth && $validToMonth < $todayMonth && $validFromMonth > $validToMonth) {
